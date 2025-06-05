@@ -3,95 +3,56 @@
 -- ------------------------------------------------------------------------------------------
 
 
-DROP DATABASE IF EXISTS plants;
+DROP DATABASE IF EXISTS flashCards;
 
-CREATE DATABASE plants;
+CREATE DATABASE flashCards;
 
-USE plants;
+USE flashCards;
 
 
 -- ------------------------------------------------------------------------------------------
 -- landscape tables--------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------
 
--- people
-CREATE TABLE IF NOT EXISTS people (
-    personID int NOT NULL AUTO_INCREMENT,
+-- users
+CREATE TABLE IF NOT EXISTS users (
+    userID int NOT NULL AUTO_INCREMENT,
     personName varchar(30) NOT NULL,
-    personPicture mediumblob,
     PRIMARY KEY (personID)
 );
 
--- plants
-CREATE TABLE IF NOT EXISTS plants (
-    plantID int NOT NULL AUTO_INCREMENT,
-    plantName varchar(30) NOT NULL,
-    speciesID int,
-    plantPic mediumblob,
-    dateAcquired date,
-    status ENUM('active', 'given_away', 'dead') NOT NULL DEFAULT 'active',
-    ownedBy int,
-    PRIMARY KEY (plantID)
+-- languages
+CREATE TABLE IF NOT EXISTS languages (
+    languageID int NOT NULL AUTO_INCREMENT,
+    languageName varchar(30) NOT NULL,
+    PRIMARY KEY (languageID)
 );
 
--- plant notes
-CREATE TABLE IF NOT EXISTS plantNotes (
-    noteID int NOT NULL AUTO_INCREMENT,
-    plantID int NOT NULL,
-    noteDate date,
-    note varchar(1000),
-    PRIMARY KEY (noteID)
+-- words
+CREATE TABLE IF NOT EXISTS words (
+    wordID int NOT NULL AUTO_INCREMENT,
+    wordName varchar(50) NOT NULL,
+    languageID int NOT NULL,
+    wordDefinition varchar(500) NOT NULL,
+    wordType varchar(50) NOT NULL,
+    declension varchar(50) NOT NULL,
+    PRIMARY KEY (wordID)
 );
 
--- species
-CREATE TABLE IF NOT EXISTS species (
-    speciesID int NOT NULL AUTO_INCREMENT,
-    speciesName varchar(30) NOT NULL,
-    speciesScientificName varchar(30) NOT NULL,
-    speciesCare varchar(1000) NOT NULL,
-    speciesCareLink varchar(1000),
-    PRIMARY KEY (speciesID)
-);
-
--- times watered
-CREATE TABLE IF NOT EXISTS waterDate (
-    waterID int NOT NULL AUTO_INCREMENT,
-    plantID int NOT NULL,
-    waterDate date NOT NULL,
-    PRIMARY KEY (waterID)
-);
-
--- times fertalized
-CREATE TABLE IF NOT EXISTS fertalizedDate (
-    fertalizedID int NOT NULL AUTO_INCREMENT,
-    plantID int NOT NULL,
-    fertalizeDate date NOT NULL,
-    PRIMARY KEY (fertalizedID)
-);
-
--- track status changes
-CREATE TABLE IF NOT EXISTS statusChange (
-    changeID int NOT NULL AUTO_INCREMENT,
-    plantID int NOT NULL,
-    status varchar(15),
-    disposition varchar (500),
-    dateChanged date NOT NULL,
-    PRIMARY KEY (changeID)
-);
-
--- create wishlists
-CREATE TABLE IF NOT EXISTS wishlists (
-    wishlistID int NOT NULL AUTO_INCREMENT,
-    wishlistName varchar(50) NOT NULL,
-    personID int NOT NULL,
-);
-
---wishlist items
-CREATE TABLE IF NOT EXISTS wishlistItems (
+-- words for specific languages that a user is practicing
+CREATE TABLE IF NOT EXISTS practiceLists(
     itemID int NOT NULL AUTO_INCREMENT,
-    wishlistID int NOT NULL,
-    speciesID int NOT NULL,
+    wordID int NOT NULL,
+    userID int NOT NULL,
+);
 
+-- tracks number of correct answers for user per language
+CREATE TABLE IF NOT EXISTS answers (
+    answerID int NOT NULL AUTO_INCREMENT,
+    wordID int NOT NULL,
+    userID int NOT NULL,
+    answeredRight int,
+    answeredWrong int,
 );
 
 -- ------------------------------------------------------------------------------------------
@@ -99,29 +60,11 @@ CREATE TABLE IF NOT EXISTS wishlistItems (
 -- ------------------------------------------------------------------------------------------
 
 
-ALTER TABLE plants
-ADD FOREIGN KEY (ownedBy) REFERENCES people(personID);
+ALTER TABLE words
+ADD FOREIGN KEY (languageID) REFERENCES languages(languageID);
 
-ALTER TABLE plants
-ADD FOREIGN KEY (speciesID) REFERENCES species(speciesID);
+ALTER TABLE practiceLists
+ADD FOREIGN KEY (wordID) REFERENCES words(wordID);
 
-ALTER TABLE waterDate
-ADD FOREIGN KEY (plantID) REFERENCES plants(plantID);
-
-ALTER TABLE fertalizedDate
-ADD FOREIGN KEY (plantID) REFERENCES plants(plantID);
-
-ALTER TABLE plantNotes
-ADD FOREIGN KEY (plantID) REFERENCES plants(plantID);
-
-ALTER TABLE statusChange
-ADD FOREIGN KEY (plantID) REFERENCES plants(plantID);
-
-ALTER TABLE wishlists
-ADD FOREIGN KEY (personID) REFERENCES people(personID);
-
-ALTER TABLE wishlistItems
-ADD FOREIGN KEY (speciesID) REFERENCES species(speciesID);
-
-ALTER TABLE wishlistItems
-ADD FOREIGN KEY (wishlistID) REFERENCES wishilsts(wishlistID);
+ALTER TABLE practiceLists
+ADD FOREIGN KEY (userID) REFERENCES users(userID);
